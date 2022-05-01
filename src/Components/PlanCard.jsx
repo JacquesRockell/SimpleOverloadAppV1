@@ -44,8 +44,12 @@ export default function PlanCard({plan}) {
         if (index !== -1) {
             array[index].title = title
             setUser({...user, workoutPlans: array})
-            renamePlan(authToken, API, index, title)
-            setUpdate(!update)
+            const res = await renamePlan(authToken, API, index, title)
+            if(res.error){
+                console.log('Error renaming plan')
+            }else if(res){
+                setUpdate(!update)
+            }     
         }       
     }
 
@@ -56,7 +60,12 @@ export default function PlanCard({plan}) {
         if (index !== -1) {
             array.splice(index, 1)
             setUser({...user, workoutPlans: array})
-            deletePlan(authToken, API, index)
+            const res = await deletePlan(authToken, API, index)
+            if(res.error){
+                console.log('Error renaming plan')
+            }else if(res){
+                setUpdate(!update)
+            } 
         }       
     }
 

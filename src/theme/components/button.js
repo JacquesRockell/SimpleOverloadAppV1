@@ -2,7 +2,9 @@ import { whiten, darken, mode } from "@chakra-ui/theme-tools";
 
 export const ButtonStyle = {
     // style object for base or default style
-    baseStyle: {},
+    baseStyle: {
+        _focus:{ boxShadow: "none"}
+    },
     // styles for different sizes ("sm", "md", "lg")
     sizes: {},
     // styles for different visual variants ("outline", "solid")
@@ -23,6 +25,7 @@ export const ButtonStyle = {
                 bg: mode(darken("primary", 10), whiten("primary", 10))(props),
                 color: "white",
             },
+            
         }),
     }, 
     // default values for `size` and `variant`

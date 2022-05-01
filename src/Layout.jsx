@@ -22,121 +22,135 @@ export default function Layout() {
     }
 
     return (	
-        <Flex pos="relative">            
-            <Flex 
-                pos="sticky"
-                top={0}
-                bg={secondary} 
-                direction="column"
-                left={0}
-                w={isOpen ? '18rem' : '80px'}
-                h='100vh'
-                p={5}
-                gap={5}
-            >      
-                <Flex alignItems='center' gap={5} >
-                    <IconButton icon={<HamburgerIcon/>} onClick={() => setIsOpen(!isOpen)} />
-                    <Text isTruncated>{user && user.username}</Text>
-                </Flex>  
-                <Divider />
+        <Flex pos="relative" direction={authToken ? 'row': 'column'} minH='100vh'>            
+            {authToken ? 
                 <Flex 
+                    pos="sticky"
+                    top={0}
+                    bg={secondary} 
                     direction="column"
+                    left={0}
+                    w={isOpen ? '18rem' : '80px'}
+                    h='100vh'
+                    p={5}
                     gap={5}
-                    overflowY='auto'
-                    overflowX='hidden'
-                >
-                    <NavItem to="/">
-                        <Flex w='100%' justify='flex-start' alignItems='center' gap={5} minH='2.5rem'>                   
-                            <RiHomeLine/>
-                            <NavItemText isOpen={isOpen}>
-                                <Text>Landing</Text>
-                            </NavItemText>                             
-                        </Flex>   
-                    </NavItem>
-                    <NavItem to="home/">
-                        <Flex w='100%' justify='flex-start' alignItems='center' gap={5} minH='2.5rem'>                   
-                            <RiHomeLine/>
-                            <NavItemText isOpen={isOpen}>
-                                <Text>Home</Text>
-                            </NavItemText>                             
-                        </Flex>   
-                    </NavItem>
-                    <NavItem to="home/profile" >
-                        <Flex w='100%' justify='flex-start' alignItems='center' gap={5} minH='2.5rem'>                   
-                            <CgProfile />
-                            <NavItemText isOpen={isOpen}>
-                                <Text>Profile</Text>
-                            </NavItemText>                             
-                        </Flex>   
-                    </NavItem>
-                    <Accordion defaultIndex={[0]} allowMultiple>
-                        <AccordionItem border='none' p={0}>
-                            <AccordionButton  _focus={{outline: 'none'}} pl='10px'  w='100%' >
-                                <Flex w='100%' justify='flex-start' alignItems='center' gap={5} minH='2.5rem'>                   
-                                    <AccordionIcon />
-                                    <NavItemText isOpen={isOpen}>
-                                        <Text>Workout Plans</Text>
-                                    </NavItemText>                             
-                                </Flex> 
-                            </AccordionButton>
-                            <AccordionPanel p={0}>
-                                <Flex direction="column" gap={5} >
-                                    {user && 
-                                        user.workoutPlans.map((plan, index) => (
-                                            plan._id ?
-                                                <NavItem to={"home/"+plan._id} key={index}>
+                >      
+                    <Flex alignItems='center' gap={5} >
+                        <IconButton icon={<HamburgerIcon/>} onClick={() => setIsOpen(!isOpen)} />
+                        <Text isTruncated>{user && user.username}</Text>
+                    </Flex>  
+                    <Divider />
+                    <Flex 
+                        direction="column"
+                        gap={5}
+                        overflowY='auto'
+                        overflowX='hidden'
+                    >
+                        <NavItem to="/" end={true}>
+                            <Flex w='100%' justify='flex-start' alignItems='center' gap={5} minH='2.5rem'>                   
+                                <RiHomeLine/>
+                                <NavItemText isOpen={isOpen}>
+                                    <Text>Landing</Text>
+                                </NavItemText>                             
+                            </Flex>   
+                        </NavItem>
+                        <NavItem to="home/" end={true}>
+                            <Flex w='100%' justify='flex-start' alignItems='center' gap={5} minH='2.5rem'>                   
+                                <RiHomeLine/>
+                                <NavItemText isOpen={isOpen}>
+                                    <Text>Home</Text>
+                                </NavItemText>                             
+                            </Flex>   
+                        </NavItem>
+                        <NavItem to="home/profile" end={true}>
+                            <Flex w='100%' justify='flex-start' alignItems='center' gap={5} minH='2.5rem'>                   
+                                <CgProfile />
+                                <NavItemText isOpen={isOpen}>
+                                    <Text>Profile</Text>
+                                </NavItemText>                             
+                            </Flex>   
+                        </NavItem>
+                        <Accordion defaultIndex={[0]} allowMultiple>
+                            <AccordionItem border='none' p={0}>
+                                <Button variant='unstyled' as={AccordionButton} pl='10px' w='100%'>
+                                    <Flex w='100%' justify='flex-start' alignItems='center' gap={5} minH='2.5rem'>                   
+                                        <AccordionIcon />
+                                        <NavItemText isOpen={isOpen}>
+                                            <Text>Workout Plans</Text>
+                                        </NavItemText>                             
+                                    </Flex> 
+                                </Button>
+                                <AccordionPanel p={0}>
+                                    <Flex direction="column" gap={5} >
+                                        {user && 
+                                            user.workoutPlans.map((plan, index) => (
+                                                plan._id ?
+                                                    <NavItem to={`home/${plan._id}/`} key={index} end={false}>
+                                                        <Flex w='100%' justify='flex-start' alignItems='center' gap={5} minH='2.5rem'>                   
+                                                            <BiSpreadsheet />
+                                                            <NavItemText isOpen={isOpen}>
+                                                                <Text>{plan.title}</Text>
+                                                            </NavItemText>                             
+                                                        </Flex>   
+                                                    </NavItem> 
+                                                :
+                                                <NavItem to="home/" key={index}>
                                                     <Flex w='100%' justify='flex-start' alignItems='center' gap={5} minH='2.5rem'>                   
                                                         <BiSpreadsheet />
                                                         <NavItemText isOpen={isOpen}>
-                                                            <Text>{plan.title}</Text>
+                                                            <Text color='gray.500'>{plan.title}</Text>
                                                         </NavItemText>                             
                                                     </Flex>   
-                                                </NavItem> 
-                                            :
-                                            <NavItem to="home/" key={index}>
-                                                <Flex w='100%' justify='flex-start' alignItems='center' gap={5} minH='2.5rem'>                   
-                                                    <BiSpreadsheet />
-                                                    <NavItemText isOpen={isOpen}>
-                                                        <Text color='gray.500'>{plan.title}</Text>
-                                                    </NavItemText>                             
-                                                </Flex>   
-                                            </NavItem>            
-                                        ))
-                                    }
-                                </Flex>
-                            </AccordionPanel>
-                        </AccordionItem>
-                    </Accordion>
-                      
-                </Flex>
-                <Flex mt="auto" justify='space-between' alignItems='center'>
-                    <Popover placement='top' offset={[90, 10]}>
-                        <PopoverTrigger>
-                        <Button w='100%' variant='primaryOutline'><SettingsIcon /></Button>
-                        </PopoverTrigger>
-                        <Portal>
-                            <PopoverContent w='200px' bg={secondary}>
-                                <PopoverHeader p={5}><Text fontSize='lg' fontWeight='bold'>Settings</Text></PopoverHeader>
-                                <PopoverBody p={5}>
-                                    <VStack alignItems={"flex-start"} gap={3}>
-                                        <Button w='100%' variant='primaryOutline' onClick={toggleColorMode}>{colorMode == 'light' ? <SunIcon/> : <MoonIcon/>}</Button>  
-                                        {authToken ? 
-                                            <Button w='100%' variant='primary' onClick={signOut}>Sign Out</Button>
-                                            :
-                                            <Button as={Link} to='/login' w='100%' variant='primary'>Login</Button>     
+                                                </NavItem>            
+                                            ))
                                         }
-                                    </VStack>                            
-                                </PopoverBody>
-                            </PopoverContent>
-                        </Portal>
-                    </Popover>                            
-                </Flex>                             
-            </Flex> 	
-            <Flex w='100%' alignItems='start'  p={20}>                           
-                <Outlet />                            
+                                    </Flex>
+                                </AccordionPanel>
+                            </AccordionItem>
+                        </Accordion>                    
+                    </Flex>
+                    <Flex mt="auto" justify='space-between' alignItems='center'>
+                        <Popover placement='top' offset={[90, 10]}>
+                            <PopoverTrigger>
+                            <Button w='100%' variant='primaryOutline'><SettingsIcon /></Button>
+                            </PopoverTrigger>
+                            <Portal>
+                                <PopoverContent w='200px' bg={secondary}>
+                                    <PopoverHeader p={5}><Text fontSize='lg' fontWeight='bold'>Settings</Text></PopoverHeader>
+                                    <PopoverBody p={5}>
+                                        <VStack alignItems={"flex-start"} gap={3}>
+                                            <Button w='100%' variant='primaryOutline' onClick={toggleColorMode}>{colorMode == 'light' ? <SunIcon/> : <MoonIcon/>}</Button>  
+                                            <Button w='100%' variant='primary' onClick={signOut}>Sign Out</Button>
+                                        </VStack>                            
+                                    </PopoverBody>
+                                </PopoverContent>
+                            </Portal>
+                        </Popover>                            
+                    </Flex>                             
+                </Flex>
+            :
+                <Flex justifyContent='center' w='100%'>
+                    <Container 
+                        maxW='container.md'
+                        borderBottomWidth='2px' 
+                        borderBottomColor={colorMode == 'light' ? 'gray.900': 'gray.100'}
+                        p={5}
+                    >
+                        <HStack float='right' gap={2}>
+                            <Button as={ReactLink} variant='ghost' to='/'>About</Button>
+                            <Button as={ReactLink} variant='ghost' to='/register'>Register</Button>
+                            <Button as={ReactLink} to='/login' variant='primaryOutline'>Login</Button>
+                            <IconButton variant='outline' onClick={toggleColorMode} icon={colorMode == 'light' ? <SunIcon/> : <MoonIcon/>}/>
+                        </HStack>         
+                    </Container>
+                </Flex>
+            }	
+            <Flex justifyContent='center' flexGrow={1}>
+                <Container maxW='container.lg' top={0} bottom={0} p={[5, 10, 20]} m={0}>
+                    <Outlet /> 
+                </Container>                                                               
             </Flex>
         </Flex>		
-
     )
 }
 
@@ -145,9 +159,9 @@ function NavItemText({children, isOpen}){
     else return ""
 }
 
-function NavItem({ children, to, ...props }) {
-    let resolved = useResolvedPath(to);
-    let match = useMatch({ path: resolved.pathname, end: true });
+function NavItem({ children, to, end, ...props }) {
+    let resolved = useResolvedPath(to)
+    let match = useMatch({ path: resolved.pathname, end: end })
   
     return (
         <IconButton
@@ -156,7 +170,6 @@ function NavItem({ children, to, ...props }) {
             color={ match ? 'white' : 'current' }
             to={to}
             pl='12px'
-            _focus={{outline: 'none'}}
             {...props}
         >
             {children}

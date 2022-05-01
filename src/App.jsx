@@ -24,6 +24,11 @@ export default function App() {
 	const [ update, setUpdate ] = useState(false)
 	const values = { API, authToken, setAuthToken, colorMode, toggleColorMode, secondary, secondaryBorder, user, setUser, update, setUpdate }
 	
+	function signOut(){  
+        window.localStorage.removeItem('auth-token')
+        setAuthToken(null) 
+        setUser(null)    
+    }
 
 	useEffect(async () => {
 		let token = window.localStorage.getItem('auth-token')
@@ -31,7 +36,7 @@ export default function App() {
 			setAuthToken(token)
 			const res = await getUser(token, API)
 			if(res.error){
-				console.log(res.error)
+				signOut()
 			} 
 			else if (res.user) {
 				setUser(res.user)

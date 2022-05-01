@@ -98,8 +98,8 @@ export default function DayCard({planId, day}) {
                     {day._id ?
                         //Adding plan to UI before sever response
                         <HStack align='flex-end'>   
-                                <Button as={ReactLink} to={ day._id} variant='primary'>Open</Button>
-                                <Button colorScheme='red' bg='red.500' onClick={onOpen}>Delete</Button>
+                            <Button as={ReactLink} to={day._id} variant='primary'>Open</Button>
+                            <Button colorScheme='red' bg='red.500' onClick={onOpen}>Delete</Button>
                         </HStack>
                         :
                         <HStack align='flex-end'>   

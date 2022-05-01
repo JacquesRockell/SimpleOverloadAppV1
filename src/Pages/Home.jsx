@@ -4,10 +4,12 @@ import { Button, Collapse, Container, Flex, Heading, HStack, Slide, useDisclosur
 import { Outlet, Route, Routes } from 'react-router-dom'
 import Plan from './Plan'
 import Profile from './Profile'
+import Day from './Day'
 
 //Context
 import { useContext, useEffect, useState } from 'react'
 import { AppContext } from '../App'
+
 
 
 export default function HomePage(){
@@ -22,11 +24,11 @@ export default function HomePage(){
                 {user?.workoutPlans
                     .filter(plan => plan._id)
                     .map((plan) => (
-                    <Route
-                        path={`/${plan._id}`}
-                        key={plan._id}
-                        element={<Plan plan={plan} />}
-                    />
+                        <Route
+                            path={`/${plan._id}/*`}
+                            key={plan._id}
+                            element={<Plan plan={plan}/>}                        
+                        />                    
                     ))
                 } 
             </Routes>                        
