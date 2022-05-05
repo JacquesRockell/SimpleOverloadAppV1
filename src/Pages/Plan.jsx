@@ -42,8 +42,6 @@ export default function Plan({plan}) {
         return errors
     }
 
-    let location = useLocation();
-
     return (
         <>   
             <Flex direction='column' gap={5} w='100%'>
