@@ -17,7 +17,8 @@ export default function App() {
 	const { toggleColorMode, colorMode } = useColorMode()
 	const secondary = (colorMode == 'light' ? 'secondary.100' : 'secondary.800')
 	const secondaryBorder = (colorMode == 'light' ? 'secondary.50' : 'secondary.900')
-	const API = 'http://localhost:9000/.netlify/functions/api'
+	//const API = 'http://35.244.89.239/api'
+	const API = 'http://localhost:8080/api'
 	//const API = 'https://celadon-klepon-373f0d.netlify.app/.netlify/functions/api'
 	const [ authToken, setAuthToken ] = useState('')
 	const [ user, setUser ] = useState()
@@ -50,7 +51,11 @@ export default function App() {
 		<AppContext.Provider value={values}>
 			<Routes>
 				<Route path='/' element={<Layout />}> 				
-					<Route index element={<Landing />} />
+					<Route index element={
+						<RequireNoAuth>
+							<Landing />
+						</RequireNoAuth>						
+					} />
 					<Route path='login' element={
 						<RequireNoAuth>
 							<Login />

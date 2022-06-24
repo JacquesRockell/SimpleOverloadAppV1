@@ -57,7 +57,7 @@ export default function DayCard({planId, day}) {
         }          
     }
 
-    const handleDeletePlan = async () => { 
+    const handleDeleteDay = async () => { 
         onClose()
         let planArr = [...user.workoutPlans]
         let PI = planArr.findIndex(ob => { return ob._id == planId })
@@ -125,7 +125,7 @@ export default function DayCard({planId, day}) {
                     </AlertDialogBody>
                     <AlertDialogFooter>
                         <Button ref={cancelRef} onClick={onClose}>No</Button>
-                        <Button colorScheme='red' bg='red.500' ml={3} onClick={handleDeletePlan}>Yes</Button>
+                        <Button colorScheme='red' bg='red.500' ml={3} onClick={handleDeleteDay}>Yes</Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

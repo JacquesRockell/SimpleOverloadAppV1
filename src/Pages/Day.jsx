@@ -1,15 +1,19 @@
 import React from 'react'
 import { Link as ReactLink } from 'react-router-dom'
-import { AlertDialog, AlertDialogBody, AlertDialogCloseButton, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Box, Button, Flex, FormControl, FormErrorMessage, FormLabel, Heading, Input, Slider, SliderFilledTrack, SliderThumb, SliderTrack, useDisclosure, VStack } from '@chakra-ui/react'
+import { AlertDialog, AlertDialogBody, AlertDialogCloseButton, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Box, Button, Flex, FormControl, FormErrorMessage, FormLabel, Heading, HStack, Input, NumberDecrementStepper, NumberIncrementStepper, NumberInput, NumberInputField, NumberInputStepper, RangeSlider, RangeSliderFilledTrack, RangeSliderThumb, RangeSliderTrack, Slider, SliderFilledTrack, SliderThumb, SliderTrack, useDisclosure, useToast, VStack } from '@chakra-ui/react'
 import { ArrowLeftIcon } from '@chakra-ui/icons'
 import SetCard from '../Components/SetCard'
 import { DragDropContext, Droppable } from 'react-beautiful-dnd'
 import { Draggable } from 'react-beautiful-dnd'
+import { addSet } from '../Axios/Set/addSet'
+import { Field, Form, Formik } from 'formik'
+import SetCardLoading from '../Components/SetCardLoading'
+import { updateSetOrder } from '../Axios/Set/updateSetOrder'
 
 //Context
 import { useContext, useEffect, useState } from 'react'
 import { AppContext } from '../App'
-import { Field, Form, Formik } from 'formik'
+
 
 export default function Day({day, planId}) {
     const { API, authToken, setAuthToken, colorMode, toggleColorMode, secondary, secondaryBorder, user, setUser, update, setUpdate } = useContext(AppContext)
@@ -17,11 +21,24 @@ export default function Day({day, planId}) {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const focusRef = React.useRef()
 
-    const [sliderValue, setSliderValue] = useState(8)
-    const [rangeSliderValue, setRangeSliderValue] = useState([8,12])
-    const [weightValue, setWeightValue] = useState('-')
+    const [rpe, setRpe] = useState(8)
+    const [repRange, setRepRange] = useState([8,12])
+    const [weight, setWeight] = useState(0)
+    const [amount, setAmount] = useState(1)
 
-    const handleDragEnd = result => {
+    const toast = useToast()
+
+    const message = (content, status) => {
+        toast({
+            position: 'top',
+            title: content,
+            status: status,
+            duration: 1500,
+            variant: 'subtle',
+        })
+    }
+
+    const handleDragEnd = async (result) => {
         const { destination, source, draggableId } = result
         if(!destination) return
         if( destination.droppableId === source.droppableId && destination.index === source.index) return
@@ -37,22 +54,50 @@ export default function Day({day, planId}) {
         let setArr = dayArr[DI].sets
         const movedSet = setArr[source.index]
         setArr.splice(source.index, 1)
-
-        setArr.splice(destination.index, 0, movedSet)
-        console.log(setArr)
+        setArr.splice(destination.index, 0, movedSet)     
         
         planArr = {...planArr, sets: setArr}
-
         setUser({...user, workoutplans: planArr  })
         
-        // const dayRes = await addDay(authToken, API, index, values)
-        // if(dayRes.error){
-        //     console.log("error")
-        // } else {
-        //     setUpdate(!update)
-        // }
+        const setRes = await updateSetOrder(authToken, API, PI, DI, source.index, destination.index)
+        if(setRes.error){
+            console.log("error")
+        } else {
+            console.log(setRes.data)
+            message(setRes.data, 'success')
+        }
 
     }
+
+    const handleAddSet = async (data) => {
+        onClose() 
+        const set = {
+            name: data.name,
+            rpe: rpe,
+            repRange: repRange,
+            weight: weight,
+        }
+
+        let planArr = user.workoutPlans
+        let PI = planArr.findIndex(ob => { return ob._id == planId })
+        if(PI == -1) return console.log('Plan Error')
+
+        let dayArr = planArr[PI].days
+        let DI = dayArr.findIndex(ob => { return ob._id == day._id })
+        if(DI == -1) return console.log('Day Error')
+
+        for(let i = amount; i > 0; i--){
+            planArr[PI].days[DI].sets.push(set)
+        }
+        setUser({...user, workoutPlans: planArr})
+        const setRes = await addSet(authToken, API, PI, DI, amount, set)
+        if(setRes.error){
+            console.log("error")
+        } else {
+            setUpdate(!update)
+        } 
+    }
+
 
     function validatation(values){
         const errors = {}
@@ -63,7 +108,7 @@ export default function Day({day, planId}) {
     return (
         <>
             <DragDropContext onDragEnd={handleDragEnd}>
-                <Flex  direction='column' alignItems='start' gap={5}> 
+                <Flex direction='column' alignItems='start' gap={5}> 
                     <Button as={ReactLink} to={`/home/${planId}`} variant='ghost' size='lg' leftIcon={<ArrowLeftIcon/>}>
                         {day.name}...
                     </Button>
@@ -84,6 +129,13 @@ export default function Day({day, planId}) {
                             </VStack> 
                         )}
                     </Droppable>
+                    <VStack mt={-3} w='100%'>
+                        {day.sets
+                            .filter(set => !set._id)
+                            .map((set, index) => (
+                                <SetCardLoading set={set} key={index}/>
+                        ))} 
+                    </VStack>
                     <Button size='lg' w="100%" variant='primaryOutline' onClick={onOpen}>Add Set</Button> 
                 </Flex>      
             </DragDropContext>
@@ -96,7 +148,7 @@ export default function Day({day, planId}) {
             >     
                 <AlertDialogOverlay />
                 <AlertDialogContent bg={secondary}>
-                    <AlertDialogHeader>Add Set</AlertDialogHeader>
+                    <AlertDialogHeader>Add Set/s</AlertDialogHeader>
                     <AlertDialogCloseButton />   
                     <Formik
                         initialValues={{ name: '' }}
@@ -104,7 +156,7 @@ export default function Day({day, planId}) {
                         validateOnBlur={false}
                         validateOnChange={true}
                         onSubmit={(values) => {
-                            handleAdd(values)
+                            handleAddSet(values)
                         }}
                     >
                         {(props) => (
@@ -113,52 +165,62 @@ export default function Day({day, planId}) {
                                     {({ field, form }) => (
                                         <AlertDialogBody> 
                                             <FormControl isInvalid={form.errors.name && form.touched.name} >
-                                                <FormLabel htmlFor='name'>Movement</FormLabel>
+                                                <FormLabel htmlFor='name'>Exercise</FormLabel>
                                                 <Input ref={focusRef} {...field} id='name' placeholder='Bench Press..' />
                                                 <FormErrorMessage>{form.errors.name}</FormErrorMessage>
                                             </FormControl>
                                         </AlertDialogBody>
                                     )}
                                 </Field> 
-                                <Field name="RPE">
-                                    {({ field, form }) => (
-                                        <AlertDialogBody> 
-                                            <FormControl isInvalid={form.errors.RPE && form.touched.RPE} >
-                                                <FormLabel htmlFor='RPE'>RPE</FormLabel>
-                                                <Input {...field} id='RPE' value={sliderValue} />
-                                                <Slider mt={2} defaultValue={sliderValue} min={5} max={10} step={1} onChange={(val) => setSliderValue(val)}>
-                                                    <SliderTrack>
-                                                        <Box position='relative' right={10} />
-                                                        <SliderFilledTrack bg='primary' />
-                                                    </SliderTrack>
-                                                    <SliderThumb boxSize={6} bg='primary' />
-                                                </Slider>
-                                                <FormErrorMessage>{form.errors.RPE}</FormErrorMessage>
-                                            </FormControl>
-                                        </AlertDialogBody>
-                                    )}
-                                </Field> 
-                                <Field name="repRange">
-                                    {({ field, form }) => (
-                                        <AlertDialogBody> 
-                                            <FormControl isInvalid={form.errors.RPE && form.touched.RPE} >
-                                                <FormLabel htmlFor='RPE'>RPE</FormLabel>
-                                                <Input {...field} id='RPE' value={sliderValue} />
-                                                <Slider mt={2} defaultValue={sliderValue} min={5} max={10} step={1} onChange={(val) => setSliderValue(val)}>
-                                                    <SliderTrack>
-                                                        <Box position='relative' right={10} />
-                                                        <SliderFilledTrack bg='primary' />
-                                                    </SliderTrack>
-                                                    <SliderThumb boxSize={6} bg='primary' />
-                                                </Slider>
-                                                <FormErrorMessage>{form.errors.RPE}</FormErrorMessage>
-                                            </FormControl>
-                                        </AlertDialogBody>
-                                    )}
-                                </Field> 
+                                <AlertDialogBody> 
+                                    <FormLabel htmlFor='rpe'>RPE</FormLabel>
+                                    <Input isDisabled={1} id='rpe' value={rpe} />
+                                    <Slider mt={2} defaultValue={rpe} min={5} max={10} step={1} onChange={(val) => setRpe(val)}>
+                                        <SliderTrack>
+                                            <Box position='relative' right={10} />
+                                            <SliderFilledTrack bg='primary' />
+                                        </SliderTrack>
+                                        <SliderThumb boxSize={6} bg='primary' />
+                                    </Slider>
+                                </AlertDialogBody>
+                                <AlertDialogBody>                                        
+                                    <FormLabel htmlFor='repRange'>Rep Range</FormLabel>
+                                    <HStack>
+                                        <Input isDisabled={1} id='repRange1' value={repRange[0]} />
+                                        <Input isDisabled={1} id='repRange2' value={repRange[1]} />
+                                    </HStack>
+                                    <RangeSlider mt={2} defaultValue={repRange} min={1} max={25} step={1} onChange={(val) => setRepRange(val)}>
+                                            <RangeSliderTrack>
+                                            <RangeSliderFilledTrack bg='primary' />
+                                        </RangeSliderTrack>
+                                        <RangeSliderThumb boxSize={6} index={0} bg='primary'/>
+                                        <RangeSliderThumb boxSize={6} index={1} bg='primary'/>
+                                    </RangeSlider>             
+                                </AlertDialogBody>       
+                                <AlertDialogBody> 
+                                    <FormLabel htmlFor='weight'>Weight</FormLabel>
+                                    <NumberInput defaultValue={weight} min={0} max={5000} step={5} onChange={(val) => setWeight(val)}>
+                                        <NumberInputField />
+                                        <NumberInputStepper>
+                                            <NumberIncrementStepper />
+                                            <NumberDecrementStepper />
+                                        </NumberInputStepper>
+                                    </NumberInput>                      
+                                </AlertDialogBody>
+                                <AlertDialogBody> 
+                                    <FormLabel htmlFor='amount'>Sets to add</FormLabel>
+                                    <Input isDisabled={1} id='amount' value={amount} />
+                                    <Slider mt={2} defaultValue={amount} min={1} max={10} step={1} onChange={(val) => setAmount(val)}>
+                                        <SliderTrack>
+                                            <Box position='relative' right={10} />
+                                            <SliderFilledTrack bg='primary' />
+                                        </SliderTrack>
+                                        <SliderThumb boxSize={6} bg='primary' />
+                                    </Slider>
+                                </AlertDialogBody>                      
                                 <AlertDialogFooter>
                                     <Button onClick={onClose}>Cancle</Button>
-                                    <Button variant='primary' ml={3} type='submit'>Add</Button>
+                                    <Button variant='primary' ml={3} type='submit'>Add {amount} Set{amount > 1 ? 's' : ''}</Button>
                                 </AlertDialogFooter>           
                             </Form>
                         )}

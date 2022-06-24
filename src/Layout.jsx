@@ -46,15 +46,7 @@ export default function Layout() {
                         overflowY='auto'
                         overflowX='hidden'
                     >
-                        <NavItem to="/" end={true}>
-                            <Flex w='100%' justify='flex-start' alignItems='center' gap={5} minH='2.5rem'>                   
-                                <RiHomeLine/>
-                                <NavItemText isOpen={isOpen}>
-                                    <Text>Landing</Text>
-                                </NavItemText>                             
-                            </Flex>   
-                        </NavItem>
-                        <NavItem to="home/" end={true}>
+                        <NavItem index to="home/" end={true}>
                             <Flex w='100%' justify='flex-start' alignItems='center' gap={5} minH='2.5rem'>                   
                                 <RiHomeLine/>
                                 <NavItemText isOpen={isOpen}>
@@ -129,21 +121,7 @@ export default function Layout() {
                     </Flex>                             
                 </Flex>
             :
-                <Flex justifyContent='center' w='100%'>
-                    <Container 
-                        maxW='container.md'
-                        borderBottomWidth='2px' 
-                        borderBottomColor={colorMode == 'light' ? 'gray.900': 'gray.100'}
-                        p={5}
-                    >
-                        <HStack float='right' gap={2}>
-                            <Button as={ReactLink} variant='ghost' to='/'>About</Button>
-                            <Button as={ReactLink} variant='ghost' to='/register'>Register</Button>
-                            <Button as={ReactLink} to='/login' variant='primaryOutline'>Login</Button>
-                            <IconButton variant='outline' onClick={toggleColorMode} icon={colorMode == 'light' ? <SunIcon/> : <MoonIcon/>}/>
-                        </HStack>         
-                    </Container>
-                </Flex>
+                <></>
             }	
             <Flex justifyContent='center' flexGrow={1}>
                 <Container maxW='container.lg' top={0} bottom={0} p={[5, 10, 20]} m={0}>
