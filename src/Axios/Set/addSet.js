@@ -1,15 +1,15 @@
 import axios from "axios"
 
-export async function addSet (token, API, PI, DI, amount, data) {  
+export async function addSet (token, API, planIndex, dayIndex, amount, data) {  
     return new Promise(res => {
-        axios.post((API + `/user/plan/${PI}/day/${DI}/addSet/${amount}`), 
+        axios.post((`${API}/user/plans/${planIndex}/days/${dayIndex}/add/${amount}`), 
             data,
             {
                 headers: {'auth-token': token}
             }
         )
         .then(function (response) {
-            res(true)
+            res(response)
         })
         .catch(function (error) {
             if (error.response) {

@@ -1,15 +1,13 @@
 import axios from "axios"
 
-export async function renameDay (token, API, PI, DI, name) { 
+export async function renameDay (token, API, planIndex, id, name) { 
     return new Promise(res => {
-        axios.post((API + `/user/plan/${PI}/renameDay/${DI}`),
-            {name: name},
-            {
-                headers: {'auth-token': token}
-            }
+        axios.put((`${API}/user/plans/${planIndex}/days/${id}`),
+            { name: name },
+            { headers: { 'auth-token': token } }
         )
         .then(function (response) {
-            res(true)
+            res(response)
         })
         .catch(function (error) {
             if (error.response) {

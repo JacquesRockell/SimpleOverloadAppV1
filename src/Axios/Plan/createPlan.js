@@ -2,14 +2,14 @@ import axios from "axios"
 
 export async function createPlan (token, API, data) {  
     return new Promise(res => {
-        axios.post((API + '/user/createPlan'), 
+        axios.post((`${API}/user/plans`), 
             data,
             {
                 headers: {'auth-token': token}
             }
         )
         .then(function (response) {
-            res(true)
+            res(response)
         })
         .catch(function (error) {
             if (error.response) {

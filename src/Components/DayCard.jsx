@@ -10,7 +10,7 @@ import { AppContext } from '../App'
 
 export default function DayCard({planId, day}) {
     //Context
-    const { API, authToken, setAuthToken, colorMode, toggleColorMode, secondary, secondaryBorder, user, setUser, update, setUpdate } = useContext(AppContext)
+    const { API, authToken, setAuthToken, colorMode, toggleColorMode, secondary, secondaryBorder, user, setUser, update, setUpdate, message } = useContext(AppContext)
 
     const { isOpen, onOpen, onClose } = useDisclosure()
     const cancelRef = React.useRef()
@@ -19,62 +19,62 @@ export default function DayCard({planId, day}) {
 
     function EditableControls() {
         const {
-          isEditing,
-          getSubmitButtonProps,
-          getCancelButtonProps,
-          getEditButtonProps,
+            isEditing,
+            getSubmitButtonProps,
+            getCancelButtonProps,
+            getEditButtonProps,
         } = useEditableControls()
     
         return isEditing ? (
-          <ButtonGroup justifyContent='center' size='sm'>
-            <IconButton icon={<CheckIcon />} {...getSubmitButtonProps()} />
-            <IconButton icon={<CloseIcon />} {...getCancelButtonProps()} />
-          </ButtonGroup>
+            <ButtonGroup justifyContent='center' size='sm'>
+                <IconButton icon={<CheckIcon />} {...getSubmitButtonProps()} />
+                <IconButton icon={<CloseIcon />} {...getCancelButtonProps()} />
+            </ButtonGroup>
         ) : (
-          <Flex justifyContent='center'>
-            <IconButton bg='none' size='sm' icon={<EditIcon />} {...getEditButtonProps()} />
-          </Flex>
+            <Flex justifyContent='center'>
+                <IconButton bg='none' size='sm' icon={<EditIcon />} {...getEditButtonProps()} />
+            </Flex>
         )
     }
 
     const handleRenameDay = async (name) => {  
-        let planArr = [...user.workoutPlans]
-        let PI = planArr.findIndex(ob => { return ob._id == planId })
-        if(PI == -1) return console.log('Plan Error')
+        let planArr = user.workoutPlans
+        let planIndex = planArr.findIndex(ob => { return ob._id == planId })
+        if(planIndex == -1) return message('Plan Error', 'warning')
 
-        let dayArr = planArr[PI].days
-        let DI = dayArr.findIndex(ob => { return ob._id == day._id })
-        if(DI == -1) return console.log('Day Error')
+        let dayArr = planArr[planIndex].days
+        let dayIndex = dayArr.findIndex(ob => { return ob._id == day._id })
+        if(dayIndex == -1) return message('Day Error', 'warning')
         
-        planArr[PI].days[DI].name = name
+        planArr[planIndex].days[dayIndex].name = name
         setUser({...user, workoutPlans: planArr})
 
-        const dayRes = await renameDay(authToken, API, PI, DI, name)
+        const dayRes = await renameDay(authToken, API, planIndex, day._id, name)
         if(dayRes.error){
-            console.log("error")
+            message(dayRes.error, 'error')
         } else {
-            setUpdate(!update)
+            message(dayRes.data, 'success')
         }          
     }
 
     const handleDeleteDay = async () => { 
         onClose()
-        let planArr = [...user.workoutPlans]
-        let PI = planArr.findIndex(ob => { return ob._id == planId })
-        if(PI == -1) return console.log('Plan Error')
+        let planArr = user.workoutPlans
+        let planIndex = planArr.findIndex(ob => { return ob._id == planId })
+        if(planIndex == -1) return message('Plan Error', 'warning')
 
-        let dayArr = planArr[PI].days
-        let DI = dayArr.findIndex(ob => { return ob._id == day._id })
-        if(DI == -1) return console.log('Day Error')
+        let dayArr = planArr[planIndex].days
+        let dayIndex = dayArr.findIndex(ob => { return ob._id == day._id })
+        if(dayIndex == -1) return message('Day Error', 'warning')
         
-        planArr[PI].days.splice(DI, 1)
+        planArr[planIndex].days.splice(dayIndex, 1)
         setUser({...user, workoutPlans: planArr})
 
-        const dayRes = await deleteDay(authToken, API, PI, DI)
+        const dayRes = await deleteDay(authToken, API, planIndex, day._id)
         if(dayRes.error){
-            console.log("error")
+            message(dayRes.error, 'error')
         } else {
-            setUpdate(!update)
+            message(dayRes.data, 'success')
         }              
     }
 

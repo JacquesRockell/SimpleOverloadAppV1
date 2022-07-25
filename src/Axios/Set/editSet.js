@@ -9,7 +9,7 @@ export async function editSet (token, API, planIndex, dayIndex, setId, data) {
             }
         )
         .then(function (response) {
-            res(true)
+            res(response)
         })
         .catch(function (error) {
             if (error.response) {

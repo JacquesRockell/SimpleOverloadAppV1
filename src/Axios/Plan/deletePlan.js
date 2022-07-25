@@ -1,15 +1,14 @@
 import axios from "axios"
 
-export async function deletePlan (token, API, index) { 
+export async function deletePlan (token, API, planIndex) { 
     return new Promise(res => {
-        axios.post((API + '/user/deletePlan/' + index),
-            {},
+        axios.delete((`${API}/user/plans/${planIndex}`),
             {
                 headers: {'auth-token': token}
             }
         )
         .then(function (response) {
-            res(true)
+            res(response)
         })
         .catch(function (error) {
             if (error.response) {

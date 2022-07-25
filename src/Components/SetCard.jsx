@@ -1,18 +1,18 @@
 import React from 'react'
 import { Box, Button, Center, Checkbox, Flex, Grid, GridItem, Heading, HStack, IconButton, NumberDecrementStepper, NumberIncrementStepper, NumberInput, NumberInputField, NumberInputStepper, RangeSlider, RangeSliderFilledTrack, RangeSliderThumb, RangeSliderTrack, Slider, SliderFilledTrack, SliderThumb, SliderTrack, Spacer, Text } from '@chakra-ui/react'
-import { DeleteIcon, DragHandleIcon, EditIcon } from '@chakra-ui/icons'
+import { DeleteIcon, EditIcon } from '@chakra-ui/icons'
 import { Draggable } from 'react-beautiful-dnd'
 import { HiOutlineDotsVertical } from 'react-icons/hi'
 import { deleteSet } from '../Axios/Set/deleteSet'
 import { editSet } from '../Axios/Set/editSet'
 
 //Context
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useState } from 'react'
 import { AppContext } from '../App'
 
 
 export default function SetCard({planId, dayId, set, index}) {
-    const { API, authToken, setAuthToken, colorMode, toggleColorMode, secondary, secondaryBorder, user, setUser, update, setUpdate } = useContext(AppContext)
+    const { API, authToken, setAuthToken, colorMode, toggleColorMode, secondary, secondaryBorder, user, setUser, update, setUpdate, message } = useContext(AppContext)
 
     const [selected, setSelected] = useState(false)
     const [rpe, setRpe] = useState(set.rpe)
@@ -49,15 +49,14 @@ export default function SetCard({planId, dayId, set, index}) {
 
         let planArr = user.workoutPlans
         let planIndex = planArr.findIndex(plan => { return plan._id == planId })
-        if(planIndex == -1) return console.log('Plan Error')
+        if(planIndex == -1) return message('Plan Error', 'warning')
 
         let dayArr = planArr[planIndex].days
         let dayIndex = dayArr.findIndex(day => { return day._id == dayId })
-        if(dayIndex == -1) return console.log('Day Error')
+        if(dayIndex == -1) return message('Day Error', 'warning')
 
         let setIndex = dayArr[dayIndex].sets.findIndex(ob => { return ob._id == set._id })
-        if(setIndex == -1) return console.log('Set Error')
-
+        if(setIndex == -1) return message('Set Error', 'warning')
         let editedSet = set
         editedSet.rpe = rpe
         editedSet.repRange = repRange
@@ -66,35 +65,34 @@ export default function SetCard({planId, dayId, set, index}) {
         planArr[planIndex].days[dayIndex].sets.splice(setIndex, 1, editedSet)
         setUser({...user, workoutPlans: planArr})
         
-        setUser({...user, workoutPlans: planArr})
         const setRes = await editSet(authToken, API, planIndex, dayIndex, set._id, edit)
         if(setRes.error){
-            console.log("error")
+            message(setRes.error, 'error')
         } else {
-            
+            message(setRes.data, 'success')
         } 
     }
 
     const handleDelete = async () => {
         let planArr = user.workoutPlans
-        let PI = planArr.findIndex(ob => { return ob._id == planId })
-        if(PI == -1) return console.log('Plan Error')
+        let planIndex = planArr.findIndex(ob => { return ob._id == planId })
+        if(planIndex == -1) return message('Plan Error', 'warning')
 
-        let dayArr = planArr[PI].days
-        let DI = dayArr.findIndex(ob => { return ob._id == dayId })
-        if(DI == -1) return console.log('Day Error')
+        let dayArr = planArr[planIndex].days
+        let dayIndex = dayArr.findIndex(ob => { return ob._id == dayId })
+        if(dayIndex == -1) return message('Day Error', 'warning')
 
-        let SI = dayArr[DI].sets.findIndex(ob => { return ob._id == set._id })
-        if(SI == -1) return console.log('Set Error')
+        let setIndex = dayArr[dayIndex].sets.findIndex(ob => { return ob._id == set._id })
+        if(setIndex == -1) return message('Set Error', 'warning')
 
-        planArr[PI].days[DI].sets.splice(SI, 1)
+        planArr[planIndex].days[dayIndex].sets.splice(setIndex, 1)
         setUser({...user, workoutPlans: planArr})
         
-        const setRes = await deleteSet(authToken, API, PI, DI, set._id)
+        const setRes = await deleteSet(authToken, API, planIndex, dayIndex, set._id)
         if(setRes.error){
-            console.log("error")
+            message(setRes.error, 'error')
         } else {
-            setUpdate(!update)
+            message(setRes.data, 'success')
         } 
     }
 

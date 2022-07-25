@@ -15,25 +15,27 @@ import { AppContext } from '../App'
 
 
 export default function Plan({plan}) {
-    const { API, authToken, setAuthToken, colorMode, toggleColorMode, secondary, secondaryBorder, user, setUser, update, setUpdate } = useContext(AppContext)
+    const { API, authToken, setAuthToken, colorMode, toggleColorMode, secondary, secondaryBorder, user, setUser, update, setUpdate, message } = useContext(AppContext)
 
     const { isOpen, onOpen, onClose } = useDisclosure()
     const focusRef = React.useRef()
 
-    const handleAdd = async (values) => {
+    const handleAddDay = async (values) => {
         onClose()
-        let array = [...user.workoutPlans]
-        let index = array.findIndex(ob => { return ob._id == plan._id })
-        if (index !== -1) {
-            array[index].days.push(values)
-            setUser({...user, workoutPlans: array})
-            const dayRes = await addDay(authToken, API, index, values)
-            if(dayRes.error){
-                console.log("error")
-            } else {
-                setUpdate(!update)
-            }
-        }           
+        let planArr = user.workoutPlans
+        let planIndex = planArr.findIndex(ob => { return ob._id == plan._id })
+        if(planIndex == -1) return message('Plan Error', 'warning')
+
+        planArr[planIndex].days.push(values)
+        setUser({...user, workoutPlans: planArr})
+
+        const dayRes = await addDay(authToken, API, planIndex, values)
+        if(dayRes.error){
+            message(dayRes.error, 'error')
+        } else {
+            message(dayRes.data, 'success')
+            setUpdate(!update)
+        }          
     }
 
     function validatation(values){
@@ -44,25 +46,13 @@ export default function Plan({plan}) {
 
     return (
         <>   
-            <Flex direction='column' gap={5} w='100%'>
-                <Menu>                 
-                    <MenuButton>
-                        <HStack alignItems='flex-end'>
-                            <Heading size='2xl' mr={-3}>{plan.title}</Heading>
-                            <BiDotsVerticalRounded  fontSize={26}/>
-                        </HStack>                  
-                    </MenuButton>
-                    <MenuList bg={secondary}maxW='2rem'>
-                        <MenuItem icon={<FiEdit />}>Edit Title</MenuItem>
-                        <MenuItem icon={<AiOutlineDelete />}>Delete {plan.title}</MenuItem>
-                    </MenuList>
-                </Menu>
+            <Flex direction='column' gap={5} w='100%'>     
+                <Heading size='2xl' mr={-3}>{plan.title}</Heading>           
                 <Divider />     
                 <Routes>
                     <Route index element={                
                         <>
                             {plan.days
-                                .filter(day => day._id)
                                 .map((day) => 
                                     <DayCard planId={plan._id} day={day} key={day._id} />
                                 )
@@ -100,7 +90,7 @@ export default function Plan({plan}) {
                         validateOnBlur={false}
                         validateOnChange={true}
                         onSubmit={(values) => {
-                            handleAdd(values)
+                            handleAddDay(values)
                         }}
                     >
                         {(props) => (

@@ -4,19 +4,18 @@ import { AlertDialog, AlertDialogBody, AlertDialogCloseButton, AlertDialogConten
 import { ArrowLeftIcon } from '@chakra-ui/icons'
 import SetCard from '../Components/SetCard'
 import { DragDropContext, Droppable } from 'react-beautiful-dnd'
-import { Draggable } from 'react-beautiful-dnd'
 import { addSet } from '../Axios/Set/addSet'
 import { Field, Form, Formik } from 'formik'
 import SetCardLoading from '../Components/SetCardLoading'
 import { updateSetOrder } from '../Axios/Set/updateSetOrder'
 
 //Context
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useState } from 'react'
 import { AppContext } from '../App'
 
 
 export default function Day({day, planId}) {
-    const { API, authToken, setAuthToken, colorMode, toggleColorMode, secondary, secondaryBorder, user, setUser, update, setUpdate } = useContext(AppContext)
+    const { API, authToken, setAuthToken, colorMode, toggleColorMode, secondary, secondaryBorder, user, setUser, update, setUpdate, message } = useContext(AppContext)
 
     const { isOpen, onOpen, onClose } = useDisclosure()
     const focusRef = React.useRef()
@@ -26,32 +25,20 @@ export default function Day({day, planId}) {
     const [weight, setWeight] = useState(0)
     const [amount, setAmount] = useState(1)
 
-    const toast = useToast()
-
-    const message = (content, status) => {
-        toast({
-            position: 'top',
-            title: content,
-            status: status,
-            duration: 1500,
-            variant: 'subtle',
-        })
-    }
-
     const handleDragEnd = async (result) => {
         const { destination, source, draggableId } = result
         if(!destination) return
         if( destination.droppableId === source.droppableId && destination.index === source.index) return
         
         let planArr = user.workoutPlans
-        let PI = planArr.findIndex(ob => { return ob._id == planId })
-        if(PI == -1) return console.log('Plan Error')
+        let planIndex = planArr.findIndex(ob => { return ob._id == planId })
+        if(planIndex == -1) return message('Plan Error', 'warning')
 
-        let dayArr = planArr[PI].days
-        let DI = dayArr.findIndex(ob => { return ob._id == day._id })
-        if(DI == -1) return console.log('Day Error')
+        let dayArr = planArr[planIndex].days
+        let dayIndex = dayArr.findIndex(ob => { return ob._id == day._id })
+        if(dayIndex == -1) return message('Day Error', 'warning')
 
-        let setArr = dayArr[DI].sets
+        let setArr = dayArr[dayIndex].sets
         const movedSet = setArr[source.index]
         setArr.splice(source.index, 1)
         setArr.splice(destination.index, 0, movedSet)     
@@ -59,14 +46,12 @@ export default function Day({day, planId}) {
         planArr = {...planArr, sets: setArr}
         setUser({...user, workoutplans: planArr  })
         
-        const setRes = await updateSetOrder(authToken, API, PI, DI, source.index, destination.index)
+        const setRes = await updateSetOrder(authToken, API, planIndex, dayIndex, source.index, destination.index)
         if(setRes.error){
-            console.log("error")
+            message(setRes.error, 'error')
         } else {
-            console.log(setRes.data)
             message(setRes.data, 'success')
         }
-
     }
 
     const handleAddSet = async (data) => {
@@ -79,22 +64,23 @@ export default function Day({day, planId}) {
         }
 
         let planArr = user.workoutPlans
-        let PI = planArr.findIndex(ob => { return ob._id == planId })
-        if(PI == -1) return console.log('Plan Error')
+        let planIndex = planArr.findIndex(ob => { return ob._id == planId })
+        if(planIndex == -1) return message('Plan Error', 'warning')
 
-        let dayArr = planArr[PI].days
-        let DI = dayArr.findIndex(ob => { return ob._id == day._id })
-        if(DI == -1) return console.log('Day Error')
+        let dayArr = planArr[planIndex].days
+        let dayIndex = dayArr.findIndex(ob => { return ob._id == day._id })
+        if(dayIndex == -1) return message('Day Error', 'warning')
 
         for(let i = amount; i > 0; i--){
-            planArr[PI].days[DI].sets.push(set)
+            planArr[planIndex].days[dayIndex].sets.push(set)
         }
         setUser({...user, workoutPlans: planArr})
-        const setRes = await addSet(authToken, API, PI, DI, amount, set)
+        const setRes = await addSet(authToken, API, planIndex, dayIndex, amount, set)
         if(setRes.error){
-            console.log("error")
+            message(setRes.error, 'error')
         } else {
             setUpdate(!update)
+            message(setRes.data, 'success')
         } 
     }
 

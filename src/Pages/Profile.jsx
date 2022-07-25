@@ -14,18 +14,22 @@ import { useContext, useEffect, useState } from 'react'
 import { AppContext } from '../App'
 
 export default function Profile() {
-    const { API, authToken, setAuthToken, colorMode, toggleColorMode, secondary, secondaryBorder, user, setUser, update, setUpdate } = useContext(AppContext)
+    const { API, authToken, setAuthToken, colorMode, toggleColorMode, secondary, secondaryBorder, user, setUser, update, setUpdate, message } = useContext(AppContext)
     
     const { isOpen, onOpen, onClose } = useDisclosure()
-    const [isSubmitting, setIsSubmitting] = useState()
 
-
-    async function handleCreate(values){
-        createPlan(authToken, API, values)
+    async function handleCreate(data){
         onClose()
-        setUser({...user, workoutPlans: [...user.workoutPlans, values]})
-        setUpdate(!update)
-        setIsSubmitting(false)           
+
+        setUser({...user, workoutPlans: [...user.workoutPlans, data]})
+
+        const res = await createPlan(authToken, API, data) 
+        if(res.error){
+            message(res.error, 'error')
+        } else {
+            message(res.data, 'success')
+            setUpdate(!update) 
+        }             
     }
 
     function validatation(values){
@@ -57,7 +61,6 @@ export default function Profile() {
                             validateOnBlur={true}
                             validateOnChange={true}
                             onSubmit={(values) => {
-                                setIsSubmitting(true)
                                 handleCreate(values)
                             }}
                         >
@@ -77,7 +80,7 @@ export default function Profile() {
                                     <ModalFooter>
                                         <HStack gap={1} justifyContent='flex-end'>                                            
                                             <Button variant='primaryOutline' onClick={onClose}>Cancle</Button>
-                                            <Button variant='primary' isLoading={isSubmitting} type='submit'>Create</Button>
+                                            <Button variant='primary' type='submit'>Create</Button>
                                         </HStack>    
                                     </ModalFooter>             
                                 </Form>

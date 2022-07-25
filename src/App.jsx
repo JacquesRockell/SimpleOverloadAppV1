@@ -1,6 +1,6 @@
 import React from 'react'
 import { useState, createContext, useEffect, useContext } from 'react'
-import { useColorMode } from '@chakra-ui/react'
+import { useColorMode, useToast } from '@chakra-ui/react'
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { getUser }from './Axios/getUser'
 
@@ -17,13 +17,23 @@ export default function App() {
 	const { toggleColorMode, colorMode } = useColorMode()
 	const secondary = (colorMode == 'light' ? 'secondary.100' : 'secondary.800')
 	const secondaryBorder = (colorMode == 'light' ? 'secondary.50' : 'secondary.900')
-	//const API = 'http://35.244.89.239/api'
+
+	const toast = useToast()
+    const message = (content, status) => {
+        toast({
+            position: 'top',
+            title: content,
+            status: status,
+            duration: 1500,
+            variant: 'subtle',
+        })
+    }
+
 	const API = 'http://localhost:8080/api'
-	//const API = 'https://celadon-klepon-373f0d.netlify.app/.netlify/functions/api'
 	const [ authToken, setAuthToken ] = useState('')
 	const [ user, setUser ] = useState()
 	const [ update, setUpdate ] = useState(false)
-	const values = { API, authToken, setAuthToken, colorMode, toggleColorMode, secondary, secondaryBorder, user, setUser, update, setUpdate }
+	const values = { API, authToken, setAuthToken, colorMode, toggleColorMode, secondary, secondaryBorder, user, setUser, update, setUpdate, message }
 	
 	function signOut(){  
         window.localStorage.removeItem('auth-token')

@@ -1,15 +1,14 @@
 import axios from "axios"
 
-export async function deleteDay (token, API, PI, DI) { 
+export async function deleteDay (token, API, planIdex, id) { 
     return new Promise(res => {
-        axios.post((API + `/user/plan/${PI}/deleteDay/${DI}`),
-            {},
+        axios.delete((`${API}/user/plans/${planIdex}/days/${id}`),
             {
                 headers: {'auth-token': token}
             }
         )
         .then(function (response) {
-            res(true)
+            res(response)
         })
         .catch(function (error) {
             if (error.response) {

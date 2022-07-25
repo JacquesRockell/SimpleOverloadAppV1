@@ -11,7 +11,7 @@ import { CheckIcon, CloseIcon, EditIcon } from '@chakra-ui/icons'
 
 export default function PlanCard({plan}) {
     //Context
-    const { API, authToken, setAuthToken, colorMode, toggleColorMode, secondary, secondaryBorder, user, setUser, update, setUpdate } = useContext(AppContext)
+    const { API, authToken, setAuthToken, colorMode, toggleColorMode, secondary, secondaryBorder, user, setUser, update, setUpdate, message } = useContext(AppContext)
 
     const { isOpen, onOpen, onClose } = useDisclosure()
     const cancelRef = React.useRef()
@@ -41,6 +41,7 @@ export default function PlanCard({plan}) {
     const handleRenamePlan = async (id, title) => {  
         let array = [...user.workoutPlans]
         let index = array.findIndex(ob => { return ob._id == id })
+        
         if (index !== -1) {
             array[index].title = title
             setUser({...user, workoutPlans: array})
@@ -53,20 +54,22 @@ export default function PlanCard({plan}) {
         }       
     }
 
-    const handleDeletePlan = async (id) => { 
+    const handleDeletePlan = async () => { 
         onClose()
-        let array = [...user.workoutPlans]
-        let index = array.findIndex(ob => { return ob._id == id })
-        if (index !== -1) {
-            array.splice(index, 1)
-            setUser({...user, workoutPlans: array})
-            const res = await deletePlan(authToken, API, index)
-            if(res.error){
-                console.log('Error renaming plan')
-            }else if(res){
-                setUpdate(!update)
-            } 
-        }       
+        let planArr = user.workoutPlans
+        let planIndex = planArr.findIndex(ob => { return ob._id == plan._id })
+        if(planIndex == -1) return message('Plan Error!', 'warning')
+
+
+        planArr.splice(planIndex, 1)
+        setUser({...user, workoutPlans: planArr})
+        
+        const res = await deletePlan(authToken, API, planIndex)
+        if(res.error){
+            return message(res.error, 'error')
+        }else if(res){
+            return message(res.data, 'success')
+        }   
     }
 
     return (

@@ -46,7 +46,7 @@ export default function Layout() {
                         overflowY='auto'
                         overflowX='hidden'
                     >
-                        <NavItem index to="home/" end={true}>
+                        <NavItem to="home/" end={true}>
                             <Flex w='100%' justify='flex-start' alignItems='center' gap={5} minH='2.5rem'>                   
                                 <RiHomeLine/>
                                 <NavItemText isOpen={isOpen}>
